@@ -1,0 +1,25 @@
+name: MoveLight
+main: top.kuoer.MoveLight
+version: 1.1.3
+author: _TwT
+api-version: 1.16
+commands:
+  movel:
+    description: 插件主命令
+    usage: §a/<command> help 查看帮助
+permissions:
+  movelight.help:
+    description: "查看帮助"
+    default: true
+  movelight.reload:
+    description: "重载插件配置"
+    default: op
+  movelight.toggle:
+    description: "总开关移动光源"
+    default: op
+  movelight.player.use:
+    description: "玩家能使用移动光源"
+    default: true
+  movelight.player.onoff:
+    description: "玩家对自己开关移动光源"
+    default: true

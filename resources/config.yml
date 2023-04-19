@@ -1,0 +1,66 @@
+# true(开), false(关)
+# 是否启用移动光源
+enable: true
+# 移动光源刷新速度，20为1秒，数值越低效果越好相应的资源占用可能会高
+refresh: 5
+# 有移动光源效果的物品，其他物品可以自己添加
+# 优先级：主手 > 副手 > 头盔 > 胸甲 > 护腿 > 靴子
+# 下面的添加物品请严格按照格式，不然会报错
+usable:
+  # 物品名称
+  TORCH:
+    # 移动光源等级 0 ~ 15
+    lightLevel: 13
+    # 穿在身上是否有移动光源
+    apparel: false
+  SOUL_TORCH:
+    lightLevel: 6
+    apparel: false
+  REDSTONE_TORCH:
+    lightLevel: 6
+    apparel: false
+  LAVA_BUCKET:
+    lightLevel: 15
+    apparel: false
+  GOLD_BLOCK:
+    lightLevel: 13
+    apparel: false
+  GOLD_INGOT:
+    lightLevel: 5
+    apparel: false
+  GOLDEN_CHESTPLATE:
+    lightLevel: 9
+    apparel: true
+  GOLDEN_BOOTS:
+    lightLevel: 9
+    apparel: true
+  GOLDEN_LEGGINGS:
+    lightLevel: 9
+    apparel: true
+  GOLDEN_HELMET:
+    lightLevel: 9
+    apparel: true
+  SHROOMLIGHT:
+    lightLevel: 13
+    apparel: true
+  GLOWSTONE:
+    lightLevel: 13
+    apparel: true
+  GLOW_INK_SAC:
+    lightLevel: 4
+    apparel: false
+  JACK_O_LANTERN:
+    lightLevel: 13
+    apparel: false
+  GOLDEN_APPLE:
+    lightLevel: 6
+    apparel: false
+  ENCHANTED_GOLDEN_APPLE:
+    lightLevel: 8
+    apparel: false
+  LANTERN:
+    lightLevel: 13
+    apparel: false
+  SOUL_LANTERN:
+    lightLevel: 13
+    apparel: false
