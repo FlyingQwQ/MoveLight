@@ -36,4 +36,12 @@ public class CheckAroundSeekAir {
         this.z = z;
     }
 
+    @Override
+    public String toString() {
+        return "CheckAroundSeekAir{" +
+                "x=" + x +
+                ", y=" + y +
+                ", z=" + z +
+                '}';
+    }
 }

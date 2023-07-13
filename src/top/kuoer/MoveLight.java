@@ -1,12 +1,21 @@
 package top.kuoer;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.Collections;
 
 public class MoveLight extends JavaPlugin implements Listener {
 
@@ -32,22 +41,55 @@ public class MoveLight extends JavaPlugin implements Listener {
         Bukkit.getConsoleSender().sendMessage("[MoveLight] §a移动光源卸载完成");
     }
 
+
+
+
     @EventHandler
     public void onPlayerQuitEvent(PlayerQuitEvent e) {
         this.taskTimer.removePlayerLight(e.getPlayer());
     }
 
+    @EventHandler
+    public void onBlockPlaceEvent(BlockPlaceEvent e) {
+        Player player = e.getPlayer();
+        Block lightBlock = this.taskTimer.getPlayerLightBlock().get(player);
+        if(lightBlock != null) {
+            Block placedBlock = e.getBlockPlaced();
+            if(lightBlock.getLocation().equals(placedBlock.getLocation())) {
+                this.taskTimer.getSuspendMoveLightPlayerList().put(player, System.currentTimeMillis());
+                this.taskTimer.getPlayerLightBlock().remove(player);
+            }
+        }
+
+    }
+
+    @EventHandler
+    public void onPlayerBucketEvent(PlayerBucketEmptyEvent e) {
+        Player player = e.getPlayer();
+        Block lightBlock = this.taskTimer.getPlayerLightBlock().get(player);
+        if(lightBlock != null) {
+            Block blockClicked = e.getBlockClicked();
+            Location blockClickedLocation = blockClicked.getLocation();
+            blockClickedLocation.add(0, 1, 0);
+            if(lightBlock.getLocation().equals(blockClickedLocation)) {
+                this.taskTimer.getSuspendMoveLightPlayerList().put(player, System.currentTimeMillis());
+                this.taskTimer.removePlayerLight(player);
+            }
+        }
+    }
+
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if(args.length < 1) {
-            showHelp(sender);
+            this.showHelp(sender);
         } else {
             if(args[0].equals("help")) {
-                showHelp(sender);
+                this.showHelp(sender);
             } else if(args[0].equals("reload")) {
-                reload(sender);
+                this.reload(sender);
             } else if(args[0].equals("toggle")) {
-                toggle(sender);
+                this.toggle(sender);
             }
         }
 

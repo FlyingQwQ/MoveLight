@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" build-on-make="true" name="moveLight">
-    <output-path>$PROJECT_DIR$/../../purpur/plugins</output-path>
+    <output-path>$PROJECT_DIR$/../../servertest/plugins</output-path>
     <root id="archive" name="moveLight.jar">
       <element id="module-output" name="moveLight" />
     </root>
