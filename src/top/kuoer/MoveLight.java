@@ -28,17 +28,17 @@ public class MoveLight extends JavaPlugin implements Listener {
 
         this.taskTimer = new TaskTimer(this);
         this.taskTimer.runTaskTimer(this, 0, getConfig().getInt("refresh"));
-        Bukkit.getConsoleSender().sendMessage("[MoveLight] §a移动光源加载成功");
+        Bukkit.getConsoleSender().sendMessage("§8[§aMoveLight§8] §a移动光源加载成功");
     }
 
     @Override
     public void onDisable() {
-        Bukkit.getConsoleSender().sendMessage("[MoveLight] §6正在卸载移动光源");
+        Bukkit.getConsoleSender().sendMessage("§8[§aMoveLight§8] §6正在卸载移动光源");
 
         this.taskTimer.cancel();
         this.taskTimer.removeAllPlayerLight();
 
-        Bukkit.getConsoleSender().sendMessage("[MoveLight] §a移动光源卸载完成");
+        Bukkit.getConsoleSender().sendMessage("§8[§aMoveLight§8] §a移动光源卸载完成");
     }
 
 
@@ -47,35 +47,6 @@ public class MoveLight extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerQuitEvent(PlayerQuitEvent e) {
         this.taskTimer.removePlayerLight(e.getPlayer());
-    }
-
-    @EventHandler
-    public void onBlockPlaceEvent(BlockPlaceEvent e) {
-        Player player = e.getPlayer();
-        Block lightBlock = this.taskTimer.getPlayerLightBlock().get(player);
-        if(lightBlock != null) {
-            Block placedBlock = e.getBlockPlaced();
-            if(lightBlock.getLocation().equals(placedBlock.getLocation())) {
-                this.taskTimer.getSuspendMoveLightPlayerList().put(player, System.currentTimeMillis());
-                this.taskTimer.getPlayerLightBlock().remove(player);
-            }
-        }
-
-    }
-
-    @EventHandler
-    public void onPlayerBucketEvent(PlayerBucketEmptyEvent e) {
-        Player player = e.getPlayer();
-        Block lightBlock = this.taskTimer.getPlayerLightBlock().get(player);
-        if(lightBlock != null) {
-            Block blockClicked = e.getBlockClicked();
-            Location blockClickedLocation = blockClicked.getLocation();
-            blockClickedLocation.add(0, 1, 0);
-            if(lightBlock.getLocation().equals(blockClickedLocation)) {
-                this.taskTimer.getSuspendMoveLightPlayerList().put(player, System.currentTimeMillis());
-                this.taskTimer.removePlayerLight(player);
-            }
-        }
     }
 
 

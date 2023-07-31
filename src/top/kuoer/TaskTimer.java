@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.util.Vector;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.type.Light;
 import org.bukkit.entity.Player;
@@ -12,6 +13,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class TaskTimer extends BukkitRunnable {
 
@@ -21,8 +23,6 @@ public class TaskTimer extends BukkitRunnable {
     private Hashtable<String, UsableInfo> usableItemsInfo;
     private List<Material> replaceableBlockList;
     private final List<CheckAroundSeekAir> checkAroundSeekAirList;
-
-    private Hashtable<Player, Long> suspendMoveLightPlayerList = new Hashtable<>();
 
     public TaskTimer(MoveLight moveLight) {
         this.moveLight = moveLight;
@@ -62,20 +62,6 @@ public class TaskTimer extends BukkitRunnable {
                 continue;
             }
 
-
-
-            if(this.suspendMoveLightPlayerList.containsKey(player)) {
-                long currTime = System.currentTimeMillis();
-                long beforeTime = this.suspendMoveLightPlayerList.get(player);
-                if((currTime - beforeTime) > 1000) {
-                    this.suspendMoveLightPlayerList.remove(player);
-                }
-                continue;
-            }
-
-
-
-
             PlayerInventory playerInventory = player.getInventory();
 
             // 优先级：主手 > 副手 > 头盔 > 胸甲 > 护腿 > 靴子
@@ -106,7 +92,7 @@ public class TaskTimer extends BukkitRunnable {
             // 判断物品是不是在可以用移动光源的列表里，有的话就使用
             if (this.usableItemsInfo.containsKey(handItem.getType().toString())) {
                 if (null == playerLightBlock.get(player)) {
-                    Location lightLocation = this.aroundSeekAir(player.getLocation());
+                    Location lightLocation = this.aroundSeekAir(player);
                     if (null == lightLocation) {
                         continue;
                     }
@@ -120,12 +106,12 @@ public class TaskTimer extends BukkitRunnable {
 
                     this.playerLightBlock.put(player, lightBlock);
                 } else {
-                    Location lightLocation = this.aroundSeekAir(player.getLocation());
+                    Location lightLocation = this.aroundSeekAir(player);
                     if (null == lightLocation) {
                         clearDistanceLightBlock(player, this.playerLightBlock.get(player));
                         continue;
                     }
-                    Block newLightBlock = player.getWorld().getBlockAt(this.aroundSeekAir(lightLocation));
+                    Block newLightBlock = player.getWorld().getBlockAt(lightLocation);
                     Block oldLightBlock = this.playerLightBlock.get(player);
                     oldLightBlock.setType(Material.AIR);
                     newLightBlock.setType(Material.LIGHT);
@@ -149,7 +135,8 @@ public class TaskTimer extends BukkitRunnable {
     }
 
     // 获取玩家位置周围有没有可替换光源的方块
-    public Location aroundSeekAir(Location playerLocation) {
+    public Location aroundSeekAir(Player player) {
+        Location playerLocation = player.getLocation();
         World playerWorld = playerLocation.getWorld();
         if(null == playerWorld) {
             return null;
@@ -157,7 +144,14 @@ public class TaskTimer extends BukkitRunnable {
 
         Location targetLocation;
         Material targetMaterial;
-        for(CheckAroundSeekAir checkAroundSeekAir : this.checkAroundSeekAirList) {
+
+        List<CheckAroundSeekAir> checkAroundSeekAirList = this.checkAroundSeekAirList;
+        if(isLookingAtFeet(player)) {
+            checkAroundSeekAirList = checkAroundSeekAirList.stream().collect(Collectors.toList());
+            Collections.swap(checkAroundSeekAirList, 0, 1);
+        }
+
+        for(CheckAroundSeekAir checkAroundSeekAir : checkAroundSeekAirList) {
             targetLocation = playerLocation.clone().add(checkAroundSeekAir.getX(), checkAroundSeekAir.getY(), checkAroundSeekAir.getZ());
             targetMaterial = playerWorld.getBlockAt(targetLocation).getType();
             if(this.replaceableBlockList.contains(targetMaterial)) {
@@ -170,6 +164,9 @@ public class TaskTimer extends BukkitRunnable {
 
     // 清除距离光源离玩家范围大于10的移动光源
     public void clearDistanceLightBlock(Player player, Block lightBlock) {
+        if(null == player || null == lightBlock) {
+            return;
+        }
         Location playerLocation = player.getLocation();
         Location lightBlockLocation = lightBlock.getLocation();
 
@@ -210,18 +207,25 @@ public class TaskTimer extends BukkitRunnable {
             UsableInfo usableInfo = new UsableInfo(itemMaterialName, lightLevel, apparel);
             this.usableItemsInfo.put(itemMaterialName, usableInfo);
         }
-        Bukkit.getConsoleSender().sendMessage("[MoveLight] §a从配置文件中加载" + usableItems.size() + "件物品.");
+        Bukkit.getConsoleSender().sendMessage("§8[§aMoveLight§8] §a从配置文件中加载" + usableItems.size() + "件物品.");
     }
 
     public Map<Player, Block> getPlayerLightBlock() {
         return this.playerLightBlock;
     }
 
-    public Hashtable<Player, Long> getSuspendMoveLightPlayerList() {
-        return this.suspendMoveLightPlayerList;
-    }
-
     public List<CheckAroundSeekAir> getCheckAroundSeekAirList() {
         return this.checkAroundSeekAirList;
     }
+
+    private boolean isLookingAtFeet(Player player) {
+        Location playerLocation = player.getLocation();
+        Vector playerDirection = playerLocation.getDirection().normalize(); // 获取玩家的头部方向向量
+        Vector feetDirection = new Vector(0, -1, 0); // 脚下方块的方向向量
+
+        double dotProduct = playerDirection.dot(feetDirection); // 计算两个向量的点积
+
+        return dotProduct > 0.8; // 如果点积接近1，视为正对脚下
+    }
+
 }
